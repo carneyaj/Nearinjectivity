@@ -1,3 +1,15 @@
+//This code verifies the ramification types of the above polynomials $f(X)$.
+//In each case we exhibit enough ramification to account for the full contribution to the
+//Riemann-Hurwitz formula for the cover $f:\P^1\to \P^1$ (once we use the fact that f is totally
+//ramified over infinity), so there cannot be any further ramification.
+//In addition, the code verifies that each such $f(X)$ is indecomposable, and determines all
+//cases in which f is equivalent to a polynomial of the form $X^i g(X^m)$ with $m>1$.  The only
+//instances of this are listed in Table 8.  In every case except the first, $f$ is not equivalent for $c=1$ to a polynomial of the
+//form $X^i g(X^m)$ with $m>1$, so the Avanzi-Zannier irreducibility theorem implies that $F_{f,c}$
+//is irreducible (which implies that it has the genus listed in Table 6.
+
+
+
 //Magma
 
 //Case 2.1:
