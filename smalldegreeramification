@@ -1,4 +1,4 @@
-//to be run in magma; http://magma.maths.usyd.edu.au/magma/
+// Magma
 
 Solutions:=[];
 countsols:=0;
