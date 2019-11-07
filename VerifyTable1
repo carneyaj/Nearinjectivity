@@ -1,3 +1,27 @@
+//This Magma code verifies the ramification types of the above polynomials $f(X)$ and verifies that each such $f(X)$ is indecomposable.  Since the ramification
+//data implies that f isn't cyclic or dihedral, Fried's theorem implies that $F_{f,1}$ is irreducible.
+
+//The code also determines all cases in which f is equivalent to a polynomial of the form
+//$x^i g(x^m)$ with $m>1$, with result listed in Table 8.
+//Finally, we verify by inspection that the listed polynomials comprise all polynomials (up to equivalence)
+//having the corresponding ramification types.  We do this directly in cases 1 and 4.  In the other
+//cases, $f(X)$ has only two finite branch points, so any polynomial with the prescribed ramification type
+//may be translated to yield a polynomial in which 0 is a branch point with the same ramification type as
+//our $f(X)$.  If one preimage of 0 has different ramification index than all others, then we may translate it
+//to 0.  In case (1.16) we translate to make the cubic factor (consisting of unramified points) have
+//no degree-two term, and in case (1.14) we translate to remove the degree-one term from the factor
+//which gets cubed.  In each case, one of the factors consisting of all numbers of a given ramification index
+//has a nonzero term of degree one less than the degree of the factor, so by scaling on the right we may
+//assume that the coefficient of this term is any prescribed nonzero multiple of the leading term of the factor,
+//and then by scaling on the left we may assume that the polynomial is monic.  Finally, any two distinct
+//polynomials satisfying all of these constraints are inequivalent.  In every case besides (1.1) and (1.4),
+//we have exhibited the same number of indecomposable polynomials satisfying these constraints as the number of
+//right-equivalence classes of indecomposable polynomials with prescribed branch points and with the given ramification
+//type (this number being computed via Riemann's existence theorem after Table 5.  Since all such polynomials
+//have exactly two finite branch points, and each of our polynomials has zero as a branch point, by scaling
+//on the left we may make the second branch point be any desired value.  Hence we have exhibited all polynomials
+//having each of the ramification types in Table 5 for which $F_{f,1}$ is irreducible of genus 0 or 1.
+
 // Magma
 
 // Case 1.1
