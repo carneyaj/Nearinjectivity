@@ -1,3 +1,7 @@
+//This code computes the monodromy groups, genera, and number of polynomials $f$ having ramification 
+//type and branch points as specified by Nearinjectivity/smalldegreeramification, up to composition on 
+//the right with a degree-one polynomial. Its output generates Tables 7 and 10.
+
 // Magma
 
 //Table 1
