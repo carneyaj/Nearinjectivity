@@ -1,0 +1,248 @@
+//Magma
+
+//Case 2.1:
+
+//Here $f(X)$ is right-equivalent to $a+X^3$, so scaling on both sides turns $f$ into $X^3+1$.
+
+//Cases 2.2 and 2.3:
+
+//If $f$ has one of these ramification types, translate on the right to remove the degree-2 term; the ramification type
+//forces this not to remove the degree-1 term, so scaling on the right makes the coefficients of degrees 1 and 3
+//be in the ratio $-3:1$, and then scaling on the left makes these coefficients be 1.  Hence $f$ is equivalent to
+//$X^3 - 3X + d$, or in other words $T_3(X)+d$.  This polynomial has finite branch points $d+2$ and $d-2$, which are both
+//nonzero precisely when $d$ isn't $\pm2$, and which are not negatives of one another precisely when d is nonzero.
+//In case 2.2, $c$ is the ratio of the branch points, so any polynomial having this ramification type is strongly
+//equivalent to a polynomial $T_3(X)+d$ with d not 0 or $\pm2$.  Conversely, $f(X):=T_3(X)+d$ is indecomposable because it
+//has prime degree, and any polynomial equivalent to it which has no degree-2 term must have terms of
+//degrees both 0 and 1, hence does not have the form $X^i g(X^m)$ with $m>1$.  It follows that $F_{f,c}$ is irreducible.
+//In case 2.3, the ratio of the branch points is not c, and irreducibility implies d is nonzero, so again $T_3(X)+d$ is
+//indecomposable but not equivalent for $c\ne1$ to a polynomial of the form $X^i g(X^m)$ with $m>1$, whence $F_{f,c}$
+//is irreducible.
+
+
+//Case 2.5:
+
+//Here  $f(X)=a+dT_4(X)$.  Scale on the left to assume $d=1$.  So  $f(X)=a+T_4(X)$.  The finite branch points of $f$ are $a\pm2$,
+//so either $c=(a+2)/(a-2)$ or $c=(a-2)/(a+2)$.
+//In this case $f(X)$ decomposes as  $(a-2+X^2)\circ (X^2-2)$.
+//Since $f$ and $cf$ have distinct branch loci, as do  $(a-2+X^2)$ and $c(a-2+X^2)$,  we conclude by Fried's theorem
+/that $f(X)-cf(Y)$ is irreducible.
+
+
+//Case 2.8
+
+// Here WMA f(X)=d*X^2*(X^2+b*X+a/8).  By scaling on the right we may assume that either b=0 or b=1. If b=0 then by scaling on the right WMA a=8, and by scaling on the left WMA d=1, so f=X^2*(X^2+1), but then -1/4 is a branch point with ramification type 2,2 since  X^2*(X^2+1)+1/4 = (X^2+1/2)^2. Hence b=1, and by scaling on the left WMA d=1, so f=X^2*(X^2+X+a/8).  Compute the branch points of f:
+K<a,c>:=FunctionField(Rationals(),2); 
+R<x>:=PolynomialRing(K); 
+_<y>:=PolynomialRing(R); 
+f:=y^2*(y^2+y+a/8);
+flag,res:=IsDivisibleBy(Resultant(Derivative(f),f-x), -256*x);
+flag, Degree(res) eq 2, LeadingCoefficient(res) eq 1, Discriminant(res) eq -(a-9/4)^3 / 1024, Coefficient(res,0) eq a^3*(a-2)/2^16;
+// so if a isn't 0, 2 or 9/4 then f has three distinct finite branch points, one of which is zero. Write the nonzero finite branch points as P and cP.  Then  res=(x-P)*(x-cP). res eq x^2 + 1/2^8*(2*a^2 - 18*a + 27)*x + a^3*(a-2)/2^16; so  cP^2 = a^3*(a-2)/2^16  and  -(2*a^2 - 18*a + 27)/2^8 = P + cP = P(c+1) Now the second equation is equivalent to an expression for  P  as an element of  K,  and substituting this expression into the first equation yields:
+P:=-(2*a^2 - 18*a + 27)/2^8 /(c+1);
+acpol:=a^3*(a-2)*(c-1)^2+c*(4*a-9)^3;
+c*P^2 - a^3*(a-2)/2^16  eq  -acpol / ( 2^16 * (c+1)^2 );
+// Hence f has branch points 0,P,cP with P nonzero (for any fixed c other than 0,1,-1) if a is a root of acpol with a not 0,2,9/4
+Evaluate(Numerator(acpol),Numerator(a),0) eq -729*c;
+Evaluate(Numerator(acpol),Numerator(a),2) eq -c;
+Evaluate(Numerator(acpol),Numerator(a),9/4) eq 729/256*(c-1)^2;
+// Thus the exceptional a's never occur when c isn't 0 or 1.
+Evaluate(f,y-1/4) eq y^4 + y^2*(a-3)/8 - y*(a-2)/16 + (2*a-3)/256;
+// Hence f is equivalent to a polynomial of the form x^i g(x^m) with m>1 if and only if either a=2 (which we know doesn't occur) or a=3.  Check when a=3 occurs:
+Evaluate(Numerator(acpol),Numerator(a),3) eq 27*(c^2-c+1); So if c is a primitive 6th root of unity and a=3 then the polynomial is equivalent to a polynomial of the form x g(x^3).
+
+
+// Case 2.9
+
+// Here WMA f(X)=P+d*X^2*(X^2+b*X+a).  By scaling on the right WMA that either b=0 or b=1. If b=0 then by scaling on the right WMA a=1, and by scaling on the left WMA d=1, so f=P+X^2(X^2+1), which has the wrong number of branch points. Hence b=1, and WMA d=1 by scaling on the left, so f=P+X^2*(X^2+X+a). We need f to have three nonzero finite branch points, two of which are P and -P.
+K<P,a>:=PolynomialRing(Rationals(),2); 
+R<x>:=PolynomialRing(K); 
+_<y>:=PolynomialRing(R); 
+f:=P+y^2*(y^2+y+a);
+res:=Resultant(Derivative(f),f-x);
+Discriminant(res) eq -2^23*a^6*(a-1/4)^2*(a-9/32)^3;
+res1:=512*P^2 - 128*P*a^2 + 144*P*a - 27*P + 8*a^4 - 2*a^3;
+res2:=256*P^2 - 128*P*a^2 + 144*P*a - 27*P + 16*a^4 - 4*a^3;
+Evaluate(res,-P) eq 4*P*res1;
+Evaluate(res,0) eq P*res2;
+// so we need a to be not 0,1/4,9/32,  and we need res1=0 but res2 nonzero
+Resultant(res1,res2,P) eq 4194304*a^3*(a-1/4)*(a^4 + 63/4*a^3 - 27/2*a^2 + 243/64*a - 729/2048);
+_<a>:=PolynomialRing(Rationals());
+K<a>:=NumberField(a^4 + 63/4*a^3 - 27/2*a^2 + 243/64*a - 729/2048);
+L<P>:=PolynomialRing(K);
+res1:=512*P^2 - 128*P*a^2 + 144*P*a - 27*P + 8*a^4 - 2*a^3;
+res2:=256*P^2 - 128*P*a^2 + 144*P*a - 27*P + 16*a^4 - 4*a^3;
+GCD(res1,res2) eq P+1/768*(-128*a^2 + 144*a - 27);
+// so we need a to be not 0,1/4,9/32, and we need res1=0, and if a is a root of this special quartic then P can't be the one special value 1/768*(128*a^2-144*a+27). Conversely, if res1=0 and P is this value, then that special quartic vanishes:
+_<a>:=PolynomialRing(Rationals());
+P:=1/768*(128*a^2-144*a+27);
+res1:=512*P^2 - 128*P*a^2 + 144*P*a - 27*P + 8*a^4 - 2*a^3;
+res1 eq 8/9 * ( a^4 + 63/4*a^3 - 27/2*a^2 + 243/64*a - 729/2048 );
+
+//Case 2.10
+
+// We want a degree-4 f(X) with branch points P,cP,c^2P.  Write  f=m(X^4+eX^3+aX^2+dX+b).  Translate on the right to assume e=0.  If a,d are both nonzero then scale on the right to make them be in the ratio 3:2, and scale on the left to assume m=1.  That will be the main case: f=X^4+3/2*aX^2+aX+b.  Now treat the other cases.  If d=0 then f is a function of X^2 and hence has the wrong ramification. If a=0 then scale on both sides to assume d=1=m, so f=X^4+X+b.
+K<P,b,c>:=PolynomialRing(Rationals(),3); 
+R<x>:=PolynomialRing(K); 
+_<y>:=PolynomialRing(R); 
+f:=y^4+y+b;
+I:=ideal<K|Coefficients(Resultant(Derivative(f),f-x) + 256*(x-P)*(x-c*P)*(x-c^2*P))>;
+GroebnerBasis(I)[2] eq b;
+// Hence WMA  f=X^4+3/2*aX^2+aX+b.  Actually it's more convenient to replace b by 9/4*a^2*b.
+K<cp1inv,cm1inv,cinv,ainv,P,b,a,c>:=PolynomialRing(Rationals(),8); R<x>:=PolynomialRing(K); _<y>:=PolynomialRing(R);
+f:=y^4+3/2*a*y^2+a*y+9/4*a^2*b; res:=Resultant(Derivative(f),f-x); res/:=LeadingCoefficient(res);
+I:=ideal<K|Coefficients(res-(x-P)*(x-c*P)*(x-c^2*P)) cat [a*ainv-1, c*cinv-1, (c-1)*cm1inv-1, (c+1)*cp1inv-1]>;
+a*(a-8)^3*(c^2+c)^2 + 2^8/3^3*(a+1)^3*(c^2+c+1)^3 in I;
+b*(c^2+c+1)*(a^2+20*a-8) - (4*c^2+2*c^2*a+a^2*c^2/4+12*c+3/8*a^2*c+4+2*a+a^2/4) in I;
+// If a^2+20*a-8=0 then:
+J:=ideal<K|Basis(I) cat [a^2+20*a-8]>;
+(c+2)*(c+1/2) in J,  b^2-b/3+(a+31)/432 in J;
+// If c^2+c+1=0 then:
+J:=ideal<K|Basis(I) cat [c^2+c+1]>;
+a-8 in J; b-1/6 in J;
+// conversely, if c=+-2 then a^2+20*a-8=0:
+for cval in {-2,-1/2} do 
+	J:=ideal<K|Basis(I) cat [c-cval]>; 
+	a^2+20*a-8 in GroebnerBasis(J); 
+end for;
+// Now verify that these have the desired ramification:
+for c in {-2,-1/2} do 
+	_<a>:=PolynomialRing(Rationals()); 
+	K<a>:=NumberField(a^2+20*a-8);
+	_<b>:=PolynomialRing(K); 
+	L<b>:=ext<K|b^2-b/3+(a+31)/432>; 
+	R<x>:=PolynomialRing(L);
+	_<y>:=PolynomialRing(R); 
+	f:=y^4+3/2*a*y^2+a*y+9/4*a^2*b; 
+	res:=Resultant(Derivative(f),f-x);
+	S:={i[1]:i in Roots(res)}; 
+	true in {S eq {P,c*P,c^2*P}:P in S}; 
+end for;
+// so the polynomials in case 2.6 of Table 4 are  X^4+12X^2+8X+24, which we now verify:
+R<x>:=PolynomialRing(Rationals()); _<y>:=PolynomialRing(R); f:=y^4+12*y^2+8*y+24;
+Resultant(Derivative(f),f-x) eq -256*(x^3-11664);
+// Now if a^2+20*a-8 and c^2+c+1 and (c+2)(c+1/2)(c-1) are nonzero then...
+K<c>:=FunctionField(Rationals()); _<a>:=PolynomialRing(K);
+L<a>:=ext<K|a*(a-8)^3*(c^2+c)^2 + 2^8/3^3*(a+1)^3*(c^2+c+1)^3>;
+b:=(4*c^2+2*c^2*a+a^2*c^2/4+12*c+3/8*a^2*c+4+2*a+a^2/4) / ( (c^2+c+1) * (a^2+20*a-8) );
+P:=( (-9/64*c^4 - 9/32*c^3 - 9/64*c^2)*a^3 + (-37/48*c^6 - 37/16*c^5 - 19/8*c^4 - 43/48*c^3 -
+    19/8*c^2 - 37/16*c - 37/48)*a^2 + (13/12*c^6 + 13/4*c^5 - 5/2*c^4 - 125/12*c^3 - 
+    5/2*c^2 + 13/4*c + 13/12)*a + 1/6*c^6 + 1/2*c^5 + c^4 + 7/6*c^3 + c^2 + 1/2*c + 1/6 ) /
+      ( (c-1)^2*(c+1/2)*(c+2)*(c^2+c+1)^2 );
+R<x>:=PolynomialRing(L); 
+_<y>:=PolynomialRing(R); 
+f:=y^4+3/2*a*y^2+a*y+9/4*a^2*b;
+res:=Resultant(Derivative(f),f-x); 
+res eq -256*(x-P)*(x-c*P)*(x-c^2*P);
+// conclude that the ramification is as desired unless P=0, in which case the unique finite branch point of f would be 0, so f would need to be the fourth power of a degee-1 polynomial; but since f has no degree-3 term, the degree-1 has no constant term, contradicting the fact that f has a degree-2 term.
+
+//Case 2.13
+
+P<a,c>:=PolynomialRing(Rationals(),2);
+acpol:=a^5*c^2 + 2*a^5*c + a^5 - 5/3*a^4*c^2 - 20*a^4*c - 5/3*a^4 + 25/36*a^3*c^2 + 
+        925/18*a^3*c + 25/36*a^3 - 115/2*a^2*c + 30*a*c - 6*c;
+{Evaluate(acpol,a,0) eq -6*c,
+Evaluate(acpol,a,5/6) eq -8/243*c,
+Evaluate(acpol,a,2/3) eq 2/243*(c-1)^2,
+Resultant(acpol,a^2-3/2*a+3/5,a) eq 4/9375*(c+1)^4,
+Discriminant(acpol,a) eq -12500/243 * c^3*(c-1)^6*(c+1)^4};
+// Hence our hypotheses that acpol vanishes and c isn't 0, 1 or -1 imply that a isn't 0 or 5/6 or 2/3 and a^2-3/2*a+3/5 isn't 0, and also that for any fixed c (other than 0, 1, -1) there are five elements a\in K for which acpol vanishes.
+K<a,c>:=FieldOfFractions(P);
+bp1:=-54/15625 * (c+1) * a^3*(a-5/6)^2 / (a^2 - 3/2*a + 3/5);
+// Since both the numerator and the denominator are nonzero, bp1 is a nonzero element of K
+R<x>:=PolynomialRing(K); 
+_<y>:=PolynomialRing(R);
+f:=y*(y^2+y+3*a/10)^2;
+Resultant(Derivative(f),f-x)  eq  3125 * x^2 * 
+ ( (x-bp1) * (x-bp1/c) - acpol*54/15625*( x + (54/15625*a^5 - 18/3125*a^4 + 3/1250*a^3)/(a^2 - 3/2*a + 3/5)) );
+// Since the denominators don't vanish, but acpol does vanish, this shows that the resultant equals 3125*x^2*(x-bp1)*(x-bp1/c). It follows that f has ramification type 1^3,2 over both bp1 and bp1/c, and ramification type either 1^2,3 or 1,2^2 over 0, and clearly only the latter possibility is possible.
+
+// Now fix any c other than 0, 1, -1.  There are five corresponding values a in \K for which acpol vanishes, yielding five polynomials f which are a constant times a polynomial with branch points 1,c.  No two of these five polynomials are right-equivalent to one another, since the right equivalence class of each of them contains a unique member in which 0 is a simple root and the cofficients of the terms of degrees 1 and 2 in the quadratic factor are the same, namely the given f (times a constant); but since the ratio of the constant term of the quadratic to the leading term of the quadratic is 3a/10, it follows that the five a's give rise to five polynomials with branch points 1,c which are pairwise right-inequivalent. Since by Riemann existence we know that there are five right-equivalent classes of polynomials with these branch points and these ramification types, it follows that we have found them all.
+
+// Finally, since f has prime degree, we know that f is indecomposable.  Now check that f is not equivalent to a polynomial of the form x^i g(x^m) with m>1:
+ftrans:=Evaluate(f,y-Coefficient(f,4)/5);
+ftrans - Evaluate(ftrans,0) eq y^5 + (a-1)*3/5*y^3 + (2-3*a)/25*y^2 + (3*a-4)*(a-4/5)*3/100*y;
+// Since  a isn't 2/3, the coefficient of y^2 doesn't vanish, and clearly at least one of the coefficients of y and y^3 is nonzero, so (since the coefficient of y^4 is zero) it follows that f isn't equivalent to a polynomial of the form x^i g(x^m) with m>1.
+
+//All Remaining Cases
+
+P4<t,a,b,c>:=PolynomialRing(Rationals(),4);
+S:=[
+< t^4-4/3*t^3+1/6,b-a,a,c+1, {*[{*1,3*},{*1^^2,2*}], [{*1^^2,2*},{*1,3*}]*}, 1 >,// case (2.4)
+< t^4+4*t^3+3*(a+3)*t^2,b-a,a^2-3,c+1,{*[{*1^^2,2*},{*1^^2,2*}]^^3*}, 0 >,// case (2.6)
+< t^4+3*t^2+t+3/2,b-a,a,c^2+c+1,{*[{*1^^2,2*},{*1^^2,2*}]^^3*}, 0 >,// case (2.7)
+< t^4+3/2*a*t^2+a*t+9/4*a^2*b,b^2-b/3+(a+31)/432,a^2+20*a-8,(c+2)*(c+1/2),
+   {*[{*1^^2,2*},{*1^^2,2*}]^^2, [{*1^^2,2*},{*1^^4*}], [{*1^^4*},{*1^^2,2*}]*}, 1 >,// case (2.10b)
+< t^3*(t^2+5/4*t+(a+5)/9),b-a,a^2-5/2,c+1, {*[{*1^^2,3*},{*1^^2,3*}], [{*1^^3,2*},{*1^^3,2*}]^^2 *}, 1 >,// case (2.11)
+< t*(t^2+10*t+3/2*(15-a))^2,b-a,a^2+15,c+1,{*[{*1,2^^2*},{*1,2^^2*}], [{*1^^3,2*},{*1^^3,2*}]^^2*}, 0 >,// case (2.12)
+< t^2*(2/5*t^3+14*t^2+(-13*a^4+5*a^3+162*a^2-34*a+96)*t+(589*a^4+2035*a^3-510*a^2+274*a+1048)),
+   b-a,a^5-10*a^3+10*a^2-4,c+1, {* [{*1^^3,2*},{*1^^3,2*}], [{*1,2^^2*},{*1^^3,2*}], [{*1^^3,2*},{*1,2^^2*}] *}, 1 >,// case (2.14)
+< t*(t^2+t+3/10*a)^2+6/5^4*(2*a^2-3*a+6/5),b-a,a^5-65/9*a^4+625/36*a^3-115/6*a^2+10*a-2,c^2+c+1,
+  {* [{*1,2^^2*},{*1^^3,2*}], [{*1^^3,2*},{*1,2^^2*}], [{*1^^3,2*},{*1^^3,2*}] *}, 1 >,// case (2.15)
+< t^2*(t^4+6*t^3+3/2*(2*a^5-a^4-6*a^3+3*a^2+2*a+4)*t^2+3*(a^5+a^4-5*a^3+a^2+6*a-8/3)*t + 
+  (-39*a^5+86*a^4+47*a^3-117*a^2+130*a-35)/2),b-a,a^6-3*a^4-2*a^3-2,c+1,
+   {* [{*1^^2,2^^2*},{*1^^2,2^^2*}]^^2, [{*1^^4,2*},{*1^^4,2*}] *}, 1 >,// case (2.16)
+< t*(t^2+t+a/7)^3,b-a,a^3-19/4*a^2+8*a-32/7,c+1,
+  {* [{*1,3^^2*},{*1,3^^2*}], [{*1^^5,2*},{*1^^5,2*}]^^2 *}, 1 >  // case (2.17)
+];
+
+for sct in [1..#S] do 
+	s:=S[sct]; 
+	"testing number",sct; 
+	F:=s[1]; 
+	bpol:=s[2]; 
+	apol:=s[3]; 
+	cpol:=s[4];
+	if not IsIrreducible(apol) then "WRONG!"; 
+		break sct; 
+	end if;
+	if Degree(apol) gt 1 then K<A>:=NumberField(UnivariatePolynomial(apol));
+	else K:=Rationals(); A:=0; end if; 
+	P4K:=ChangeRing(P4,K);
+	bpol:=UnivariatePolynomial(Evaluate(P4K!bpol,[999,A,P4K.3,P4K.4]));
+	if Degree(bpol) eq 1 then L:=K; B:=Roots(bpol)[1,1]; 
+	else L<B>:=ext<K|bpol>; end if;
+	P4L:=ChangeRing(P4K,L);
+	cpol:=UnivariatePolynomial(Evaluate(cpol,[999,A,B,P4L.4]));
+	for cfac in Factorization(cpol) do 
+		"testing a choice of c"; 
+		if Degree(cfac[1]) eq 1 then M:=L; 
+			C:=Roots(cfac[1])[1,1];
+		else M<C>:=ext<L|cfac[1]>; 
+		end if;
+		R<x>:=PolynomialRing(M);
+		f:=Evaluate(ChangeRing(P4L,M)!F,[x,A,B,C]);
+// first compute the ramification types of f and cf over a few points (which will turn out to be the full branch loci)
+		_<y>:=PolynomialRing(R);
+		fy:=Evaluate(f,y);
+		bppol:=Resultant(Derivative(fy),fy-x);
+		rams:={* *};
+		for fac in Factorization(bppol*Evaluate(bppol,x/C)) do fpol:=fac[1];
+			if Degree(fpol) gt 1 then N<d>:=ext<M|fpol>; 
+			else N:=M; d:=Roots(fpol)[1,1]; end if;
+			fN:=ChangeRing(R,N)!f;
+			rams join:={* [{* i[2]^^Degree(i[1]): i in Factorization(fN-d) *}, {* i[2]^^Degree(i[1]): i in Factorization(fN*C-d) *}]^^Degree(fpol) *};
+		end for;
+// next check that f is indecomposable
+	f:=f/LeadingCoefficient(f);  n:=Degree(f);
+	for m in {i:i in Divisors(n)} diff {1,n} do gdeg:=n div m;  g:=x^gdeg;  h:=x^m;
+		for i in [1..m-1] do h+:=x^(m-i)*Coefficient(f-h^gdeg,n-i)/gdeg;  end for;
+			while f ne Evaluate(g,h) do 
+			term:=LeadingTerm(f-Evaluate(g,h));
+				if IsDivisibleBy(Degree(term),m) then g+:=LeadingCoefficient(term)*x^(Degree(term) div m);
+				else continue m; end if; 
+			end while;
+"f decomposes as the composition of these polynomials",g,h;
+		end for;
+// next check that f isn't equivalent to a polynomial of the form x^i g(x^m) with m>1
+		f:=Evaluate(f,x-Coefficient(f,n-1)/n); 
+		r:=GCD({Degree(i):i in Terms(f)} diff {0});
+		if r gt 1 then if r gt 1 then "polynomial is strongly equivalent to a Ritt twistable one",f,r;
+		else "polynomial is equivalent to a Ritt twistable one",f,r; end if; end if;
+// finally check that the ramification we computed matches the ramification type listed in Table 3, and that it accounts for all ramification of f,  and that the genus of F_{f,1} is as claimed
+		<rams eq s[5],
+ 		&+[&+[i-1:i in j[1]]: j in rams] eq Degree(f)-1,
+ 		{* j[1]: j in rams *} eq {* j[2]: j in rams *},
+ 		s[6] eq -Degree(f)+1+1/2*&+[&+[i-GCD(i,j):i in k[1], j in k[2]]: k in rams]>;
+	end for; 
+end for;
