@@ -1,3 +1,8 @@
+//The following magma code generates all possible ramification structures for a polynomial f not equivalent to X^{\ell}(X-1)^m, 
+//of degree at least three and at most 40, such that F_{f,c}(X,Y) is irreducible and defines a curve of genus zero or one. 
+//The results of this computation generate Tables 5 and 9, and Table 6 is derived from Table 9. 
+//See Section 4 for a brief summary of the algorithmic strategy used below and for further details.
+
 // Magma
 
 Solutions:=[];
