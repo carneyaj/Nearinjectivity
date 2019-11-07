@@ -1,0 +1,79 @@
+// Magma
+
+S:=[ <4,  [ {* 1^^2,2 *}, {* 1^^2,2 *}, {* 1^^2,2 *} ], 1>,  // case 1.1
+< 5,  [{* 1^^2,3 *}, {* 1^^2,3 *} ], 1>,  // case 1.2
+< 5,  [{* 1^^2,3 *}, {* 1,2^^2 *} ], 0>,  // case 1.3
+< 5,  [{* 1,2^^2 *}, {* 1^^3,2 *}, {* 1^^3,2 *} ], 1>,  // case 1.4
+< 6,  [{* 1^^2,4 *}, {* 1^^2,2^^2 *} ], 1>,  // case 1.5
+< 6,  [{* 1,2,3 *}, {* 1^^2,2^^2 *} ], 1>,  // case 1.6
+< 7,  [{* 1,2,4 *}, {* 1^^3,2^^2 *} ], 1>,  // case 1.7
+< 7,  [{* 1^^3,4 *}, {* 1,2^^3 *} ], 1>,  // case 1.8
+< 7,  [{* 1,3^^2 *}, {* 1^^4,3 *}], 1>,  // case 1.9
+< 7,  [{* 1,3^^2 *}, {* 1^^3,2^^2 *}], 0>,  // case 1.10
+< 7,  [{* 2^^2,3 *}, {* 1^^3,2^^2 *}], 1>,  // case 1.11
+< 7,  [{* 1^^2,2,3 *}, {* 1,2^^3 *}], 1>,  // case 1.12
+< 8,  [{* 2,3^^2 *}, {* 1^^4,2^^2 *}], 1>,  // case 1.13
+< 8,  [{* 1^^2,3^^2 *}, {* 1^^2,2^^3 *}], 1>,  // case 1.14
+< 9,  [{* 1,4^^2 *}, {* 1^^5,2^^2 *}], 1>,  // case 1.15
+< 9,  [{* 1^^3,3^^2 *}, {* 1,2^^4 *}], 1>,  // case 1.16
+< 10,  [{* 1,3^^3 *}, {* 1^^4,2^^3 *}], 1>  // case 1.17
+];
+
+//First turn the cycle structure written above into corresponding elements in the symmetric group.
+for s in S do 
+	n:=s[1]; 
+	G:=Sym(n);  
+	cyclestructures:=s[2];
+	elts:=[]; 
+	for c in cyclestructures do 
+		a:=[]; 
+		max:=0; 
+		for i in c do 
+			if i ne 1 then 
+				a cat:=[{@ max+j: j in [1..i] @}];
+				max+:=i; 
+			end if; 
+		end for; 
+		if a eq [] then a:=[{@ 1 @}]; end if; 
+		elts cat:=[G!a]; 
+	end for;
+	candidates:=[[<elts[1],Centralizer(G,elts[1])>]];  
+	spot:=1;
+	while spot lt #elts do 
+		spot+:=1; 
+		newcandidates:=[];
+		for t in candidates do 
+			C:=t[#t,2];  
+			B:=Conjugates(G,elts[spot]);
+			while B ne {} do  
+				b:=Random(B);  
+				D:={b^i:i in C};  
+				B diff:=D;
+				i:=1; 
+				while #D gt 1 do 
+					E:={g:g in D|i^g ne i};  
+					if E ne {} then 
+						r:=Min({i^g:g in E});  
+						D:={g:g in E|i^g eq r};
+					end if; 
+					i+:=1; 
+				end while;  
+				b:=Random(D);
+// the above two lines pick a "minimal" representative of the new element
+				newcandidates cat:=[t cat [<b,Centralizer(C,b)>]];
+			end while; 
+		end for; 
+		candidates:=newcandidates; 
+	end while;
+	solutions:=[];  
+	for t in candidates do 
+		if CycleStructure(&*[i[1]:i in t]) eq [<n,1>] then
+			solutions cat:=[[i[1]:i in t]]; 
+		end if; 
+	end for; 
+	[i:i in solutions|sub<G|i> ne G], [i:i in solutions|sub<G|i> eq G], [#sub<G|i>:i in solutions|sub<G|i> ne G],
+n,#solutions;//Print the solutions
+	if {&+[i:i in j]:j in cyclestructures} ne {n} or s[3] ne -n+2+(1/2)*&+[&+[i-GCD(i,j):i,j in k]:k in cyclestructures] then 
+		"inconsistent ramification or wrong genus"; 
+	end if;
+end for;
