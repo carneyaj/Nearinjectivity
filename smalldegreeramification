@@ -1,0 +1,235 @@
+//to be run in magma; http://magma.maths.usyd.edu.au/magma/
+
+Solutions:=[];
+countsols:=0;
+for n in [3..40] do	// n=degree of f; per Theorem 3.1 we only need to go up to n=40.
+	count:=0;
+	List:=[[[[],[]],[[0,0,0]]]];
+	bp:=0;
+	solcount:=[1];	 //solcount[i] is the of number of solutions found with i-1 branch points
+	solcountsum:=0;
+	while bp ge 0 do
+		bp+:=1;	//keep adding a new branch point each time until we don't get any possible solutions at that branch point
+		count:=0;
+		for i in [solcountsum+1..#List] do
+			previous:=List[i][1];
+			Asum:=List[i][2][1][1];
+			Bsum:=List[i][2][1][2];
+			RHsum:=List[i][2][1][3];
+			for Aone in [Max(0,Ceiling(n-2*(n-1-Asum)))..n] do	//Equation 3.6 for f, Aone=A_i^1
+				for Bone in [Max(0,Ceiling(n-2*(n-1-Bsum)))..n] do	//Equation 3.6 for cf, Bone=B_i^1
+					RH:=Ceiling(n/2*(Aone+Bone)-Aone*Bone)+RHsum;	 //right side of equation 3.9 for a single i
+					if 4*n ge RH and 2*n-Aone-Bone ne 0 and Aone ne n-1 and Bone ne n-1 then	//left side of equation 3.9, with requirement that not Aone=Bone=n (i.e. not a branch point)
+						count+:=1;
+						Aones:=previous[1] cat [Aone];
+						Bones:=previous[2] cat [Bone];
+						sums:=[[Asum+Ceiling((n-Aone)/2),Bsum+Ceiling((n-Bone)/2),RH]];   //this set is [A_i^0, B_i^0, the sum in equation 3.9]
+						List:=List cat [[[Aones,Bones],sums]];
+					end if;
+				end for;
+			end for;
+		end for;
+		solcountsum:=solcountsum+solcount[bp];
+		if 0 eq count then			//if there are no solutions for this additional branch point, set bp=-1 to end the while loop and halt the calculation for this n=deg f.
+			bp:=-1;
+		end if;
+		solcount:=solcount cat [count];
+	end while;
+	L:=[];
+	for i in [1..#List] do	//this loop pulls only solutions from List where the ramification structure of f could match that of cf.
+		if Set(List[i][1][1]) eq Set(List[i][1][2]) and #List[i][1][1] ge 2 then
+			ABzerosum:=[0,0];
+			for j in [1..2] do	//for f then for cf
+				for bp in [1..#List[i][1][j]] do //this creates an upper bound for Equation 3.7
+					adjust:=1;
+					if List[i][1][j][bp] le 1 then
+						adjust+:=2-List[i][1][j][bp];
+					end if;
+					if List[i][1][j][bp] eq n then
+						adjust:=0;
+					end if;
+					ABzerosum[j]:=ABzerosum[j]+n-List[i][1][j][bp]-adjust;		
+				end for;
+			end for;
+			if ABzerosum[1] ge n-1 and ABzerosum[2] ge n-1 then
+				L:=L cat [List[i]];
+			end if;
+		end if;
+	end for;
+	LLL:=[];	//this whole loop pulls out just unique branch structures, represented by numbers of ones.
+	LL:={};
+	for i in [1..#L] do
+		set:={**};
+		for j in [1..#L[i][1][1]] do
+			set:=set join {*[L[i][1][1][j],L[i][1][2][j]]*};
+		end for;
+		size:=#LL;
+		LL:=LL join {{set}};
+		if #LL-size eq 1 then
+			LLL:=LLL cat [L[i][1]];
+		end if;
+	end for;
+	S:=[];	//writes branch points of f to list S, and writes the permutation of these that gives branch points of cf
+	for i in [1..#LLL] do
+		perm:=[];
+		for j in [1..#LLL[i][1]] do
+			k:=0;
+			repeat
+			k+:=1;
+			until LLL[i][1][j] eq LLL[i][2][k] and not k in Set(perm);
+			perm:=perm cat [k];
+		end for;
+		S:=S cat [[LLL[i][1],perm]];
+	end for;
+	for i in [1..#S] do
+		AOsum:=0;	//partial sum of A_i^0s
+		AOs:=[];	//List of A_i^0s
+		for bp in [1..#S[i][1]] do		
+			AOsum+:=(n-S[i][1][bp])/2;		
+			AOs:=AOs cat [0];
+		end for;
+		AOsum:=0;
+		oldsolns:=[[S[i][1],[AOsum],AOs]];
+		for bp in [1..#S[i][1]] do
+			newsolns:=[];
+			for k in [1..#oldsolns] do
+				top:=n-oldsolns[k][1][bp];
+				if top ne 0 then
+					top:=top-1;
+				end if;
+				for l in [Ceiling((n-oldsolns[k][1][bp])/2)..Min(n-1-oldsolns[k][2][1],top)] do	//this range is for A_i^0, from equation 3.6 on bottom end and 3.7 on top end
+					sig:=1;
+					AOs:=oldsolns[k][3];
+					AOs[bp]:=l;
+					newsoln:=[[oldsolns[k][1],[oldsolns[k][2][1]+l],AOs]];
+					if bp eq #S[i][1] then	//if we are working on the last branch point
+						sig:=0;
+						RH:=0;
+						for m in [1..#S[i][1]] do
+							RH+:=AOs[m]*oldsolns[k][1][S[i][2][m]]+Max(2*n-3*AOs[S[i][2][m]]-2*oldsolns[k][1][S[i][2][m]],0)*(2*AOs[m]+oldsolns[k][1][m]-n); //add lower estimate to RH
+						end for;
+						if newsoln[1][2][1] eq n-1 and RH le 2*n then	//if Equation 3.7 holds and Riemann Hurwitz as in Equation 3.8 holds
+							sig:=1;	//sig=1 means this is a possible solution we should record.
+							mastersoln:=[[[oldsolns[k][1]],[AOs,S[i][2],[n]]]];
+							Solutions:=Solutions cat mastersoln;
+						end if;
+					end if;
+					if sig eq 1 then
+						newsolns:=newsolns cat newsoln;
+					end if;
+				end for;
+			end for;
+			oldsolns:=newsolns;
+		end for;
+		countsols:=countsols+#newsolns;
+	end for;
+end for;
+for index in [2..39] do	 //index is the upper bound on ramification indices which show up in solutions; we iteratively increase this
+	newS:=[];
+	for i in [1..#Solutions] do
+		n:=Solutions[i][2][3][1];		//n=deg f
+		Solutions[i][1]:=Solutions[i][1] cat [[0:x in [1..#Solutions[i][1][1]]]]; //add a new set [A_bp^index] showing the number of points ramified with index index above the bp-th branch point; initialized to all zeros
+		oldsolns:=[Solutions[i]];
+		for bp in [1..#Solutions[i][1][1]] do	//for each branch point
+			newsolns:=[];
+			for k in [1..#oldsolns] do
+				newsoln:=oldsolns[k];	//for each particular solution
+				deg:=0;	//lower bound on the degree of f implied by given ramification at bp-th branch point (i.e. the sum)
+				roots:=0;	//number of places sitting above bp-th branch point
+				for ii in [1..index-1] do
+					deg+:=newsoln[1][ii][bp]*ii;	 //add up lower bound on degree from ramification known so far at this branch point
+					roots+:=newsoln[1][ii][bp];	 //add up number of points sitting above this branch point so far
+				end for;
+				min:=Max(0,deg-n-(index+1)*(roots+newsoln[2][1][bp]-n));	 //remaining pieces of deg f must have index at least index+1 
+
+				max:=(n-deg)/index;	//this is the max number of index ii-s allowed without exceeding degree of f
+				if max*index+deg ne n then //if max doesn't add up to exactly n, then one of them must be bigger
+					max:=max-1;
+				end if;
+				for l in [Ceiling(min)..Floor(max)] do
+					newsoln[1][index][bp]:=l;
+					sig:=1;	//signal for whether this solution meets conditions or not
+					if bp eq #Solutions[i][1][1] then	//check conditions only when we're on the last branch point
+						sig:=0;
+						RH:=0;
+						for BP in [1..#Solutions[i][1][1]] do
+							BPperm:=newsoln[2][2][BP];	//using the recorded permutation, the BPperm-th branch point of f is the BP-th branch point of cf 
+							degA:=0;
+							degB:=0;
+							rootsA:=0;
+							rootsB:=0;
+							for iii in [1..index] do
+								degA+:=newsoln[1][iii][BP]*iii;	//same as deg and roots above
+								rootsA+:=newsoln[1][iii][BP];			
+								degB+:=newsoln[1][iii][BPperm]*iii;		
+								rootsB+:=newsoln[1][iii][BPperm];
+							end for;
+							for ii in [1..index] do
+								for kk in [1..index] do
+									RH:=RH+newsoln[1][ii][BP]*newsoln[1][kk][BPperm]*(ii+kk-2*GCD(ii,kk));	//add up Riemann-Hurwitz contribution of new indices
+								end for;
+							end for;
+							for ii in [1..index] do
+								RH:=RH+newsoln[1][ii][BP]*(n-degB-index*(n-newsoln[2][1][BPperm]-rootsB))+newsoln[1][ii][BPperm]*(n-degA-index*(n-newsoln[2][1][BP]-rootsA));	//lower bound for RH contribution from future indices
+							end for;
+						end for;
+						if RH le 4*n then //The sum of both inequalities in Equation 3.5
+							sig:=1;
+						end if;
+					end if;
+					if sig eq 1 then
+						newsolns:=newsolns cat [newsoln];
+					end if;
+				end for;
+			end for;
+			oldsolns:=newsolns;
+		end for;
+		newS:=newS cat newsolns;
+	end for;
+	Solutions:=newS;	//each step adds all possibilities for one higher ramification indices to the list of previous solutions
+end for;
+ct:=0;
+for i in [1..#Solutions] do
+	degP:=0;
+	gcd:=1;
+	eset:={};
+	RH:=0;
+	for bp in [1..#Solutions[i][1][1]] do
+		bpperm:=Solutions[i][2][2][bp];	//use the permutation to match these to the branch points of cf
+		for iii in [1..39] do
+
+			if Solutions[i][1][iii][bp] ne 0 then
+				for kkk in [1..39] do	//do the actual Rieman-Hurwitz calculation, one index size at a time, as in Equation 3.5
+					RH+:=(iii-GCD(iii,kkk))*Solutions[i][1][iii][bp]*Solutions[i][1][kkk][bpperm];
+				end for;
+				eset:=eset join {iii};	//list the indices which show up (not a multi-set)
+			end if;
+			degP+:=Solutions[i][1][iii][bp]*iii;	 //sum the ramification indices above the bp-th branch point
+		end for;
+		if GCD(eset) ne 1 then	//check if the indices all have a common factor >1, which would mean that f is decomposable
+			gcd:=GCD(eset);
+		end if;
+	end for;
+	branchst:=[];
+	for bp in [1..#Solutions[i][1][1]] do
+		branch:={**};
+		for ii in [1..39] do
+			branch:=branch join {*ii^^Solutions[i][1][ii][bp]*};	 //generate the ramification multiset at the bp-th branch point.
+		end for;
+		branchst:=branchst cat [branch];
+	end for;
+	RHbdd:=2*Solutions[i][2][3][1];			//=2n=2(deg f)
+	if Solutions[i][2][2] eq Sort(Solutions[i][2][2]) and #Set(branchst) eq #branchst then	//check if the permutation must be trivial, i.e. c=1, then adjust the RH bound, as in Lemma 2.4
+		RHbdd:=RHbdd-2;
+	end if;
+	if Solutions[i][2][3][1]*#Solutions[i][1][1]-degP eq 0 and gcd eq 1 and RH le RHbdd then	//check that the sum of all indices is (deg f)*(the number of branch points) and that the Riemann-Hurwitz equation holds
+		ct:=ct+1;	//count the total number of solutions
+		"Case with degree",Solutions[i][2][3][1],",";		//print each solution
+		"Branch Point Permutation:",Solutions[i][2][2];
+		if #Set(branchst) ne #branchst then	//if there are branch points with identical ramification structure note that the permutation is not unique
+			"Or possibly swap identical branch points";
+		end if;
+		"Riemann-Hurwitz sum:",RH;	//Print this, by Lemma 2.4 we can identify either the genus or that F_{f,c} is reducible.
+		branchst;
+	end if;
+end for;
